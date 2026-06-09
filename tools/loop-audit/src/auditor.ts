@@ -144,9 +144,8 @@ export async function auditProject(target: string): Promise<AuditResult> {
   // New expanded signals
   const githubDir = await fileExists(path.join(root, '.github'));
   const hasWorkflows = await fileExists(path.join(root, '.github', 'workflows'));
-  const safetyDoc = SAFETY_FILES.some(async (f) => await fileExists(path.join(root, f))) || 
-    await fileExists(path.join(root, 'docs', 'safety.md'));
-  // simple presence (note: async in .some is not awaited perfectly but good enough for heuristic)
+
+  // Proper safety doc detection
   let safetyDocPresent = false;
   for (const f of SAFETY_FILES) {
     if (await fileExists(path.join(root, f))) { safetyDocPresent = true; break; }
