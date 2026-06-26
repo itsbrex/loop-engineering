@@ -33,6 +33,8 @@ export interface SyncOptions {
   autoFix: boolean;
   dryRun: boolean;
   verbose: boolean;
+  help?: boolean;
+  json?: boolean;
 }
 
 /**
@@ -158,32 +160,37 @@ function compareMarkdownFiles(
  */
 async function scanSkillsDirectory(targetDir: string): Promise<Map<string, string>> {
   const skillsVersions = new Map<string, string>();
-  const skillsDir = path.join(targetDir, '.claude', 'skills');
-  
-  if (!await fileExists(skillsDir)) {
-    return skillsVersions;
-  }
-  
-  try {
-    const entries = await readdir(skillsDir);
-    for (const entry of entries) {
-      const skillPath = path.join(skillsDir, entry);
-      const statResult = await stat(skillPath);
-      
-      if (statResult.isDirectory()) {
-        const skillMd = path.join(skillPath, 'SKILL.md');
-        const content = await readFileContent(skillMd);
-        
-        if (content) {
-          const { frontmatter } = extractFrontmatter(content);
-          skillsVersions.set(entry, frontmatter.version || 'unknown');
+  const skillDirs = [
+    path.join(targetDir, 'skills'),
+    path.join(targetDir, '.grok', 'skills'),
+    path.join(targetDir, '.claude', 'skills'),
+    path.join(targetDir, '.codex', 'skills'),
+  ];
+
+  for (const skillsDir of skillDirs) {
+    if (!await fileExists(skillsDir)) continue;
+
+    try {
+      const entries = await readdir(skillsDir);
+      for (const entry of entries) {
+        const skillPath = path.join(skillsDir, entry);
+        const statResult = await stat(skillPath);
+
+        if (statResult.isDirectory()) {
+          const skillMd = path.join(skillPath, 'SKILL.md');
+          const content = await readFileContent(skillMd);
+
+          if (content) {
+            const { frontmatter } = extractFrontmatter(content);
+            skillsVersions.set(entry, frontmatter.version || 'unknown');
+          }
         }
       }
+    } catch {
+      // Ignore unreadable dirs
     }
-  } catch (error) {
-    // Ignore errors
   }
-  
+
   return skillsVersions;
 }
 
@@ -271,7 +278,12 @@ export async function runSync(options: SyncOptions): Promise<DriftReport> {
   // Scan skills for version information
   const skillsVersions = await scanSkillsDirectory(targetDir);
   
-  if (skillsVersions.size === 0 && await fileExists(path.join(targetDir, '.claude', 'skills'))) {
+  const hasSkillsDir = await fileExists(path.join(targetDir, 'skills'))
+    || await fileExists(path.join(targetDir, '.grok', 'skills'))
+    || await fileExists(path.join(targetDir, '.claude', 'skills'))
+    || await fileExists(path.join(targetDir, '.codex', 'skills');
+
+  if (skillsVersions.size === 0 && hasSkillsDir) {
     suggestions.push('No skills found. Run loop-init to scaffold skills.');
   }
   

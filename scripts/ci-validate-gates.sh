@@ -34,6 +34,11 @@ cd tools/loop-init
 npm ci
 npm test
 
+echo "Building and testing loop-sync…"
+cd ../loop-sync
+npm ci
+npm test
+
 echo "Building and testing mcp-server…"
 cd ../mcp-server
 npm ci

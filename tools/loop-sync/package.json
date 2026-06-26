@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node test/sync.test.mjs",
+    "test": "npm run build && node --test test/sync.test.mjs",
     "bundle": "node scripts/bundle-assets.mjs"
   },
   "keywords": [
