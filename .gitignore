@@ -29,6 +29,8 @@ build/
 **/node_modules/
 !tools/loop-audit/dist/
 !tools/loop-cost/dist/
+!tools/loop-init/dist/
+!tools/mcp-server/dist/
 !tools/goal-audit/dist/
 *.egg-info/
 

@@ -9,7 +9,7 @@ Same patterns, different tools. Skills and state schemas are shared; only schedu
 | Codex App | [codex/](./codex/) |
 | OpenClaw | [openclaw/](./openclaw/) |
 | GitHub Actions | [github-actions/](./github-actions/) |
-| MCP connectors | [mcp/](./mcp/) |
+| MCP connectors | [mcp/](./mcp/) — config example; reference server in [tools/mcp-server/](../tools/mcp-server/) |
 
 Start with [primitives-matrix.md](../docs/primitives-matrix.md) to map capabilities.
 
