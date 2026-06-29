@@ -8,7 +8,7 @@ This repo is a **practical engineering reference**, not a hype collection. We we
 |--------------|-------|
 | New loop pattern | `patterns/` + `patterns/registry.yaml` |
 | Production story | `stories/` |
-| Tool example | `examples/{grok,claude-code,codex,github-actions}/` |
+| Tool example | `examples/{grok,claude-code,codex,openclaw,github-actions}/` |
 | Skill template | `templates/` |
 | Starter kit | `starters/` |
 | Doc improvement | `docs/` |

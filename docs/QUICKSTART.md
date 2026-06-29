@@ -60,6 +60,10 @@ npx @cobusgreyling/loop-audit . --badge
 
 Use the first-run command printed by `loop-init` (pattern-specific). Week one: triage and state updates only.
 
+### OpenClaw
+
+No `loop-init --tool openclaw` yet — copy `skills/loop-triage/SKILL.md` and `STATE.md`, then create an isolated cron job. See [examples/openclaw/daily-triage.md](../examples/openclaw/daily-triage.md).
+
 ### Cursor or Windsurf
 
 No `loop-init --tool cursor` yet — copy skills and state from any starter, then map scheduling to editor Automations or Workflows. See the [Cursor & Windsurf appendix](./primitives-matrix.md#appendix-editor-transfer-recipes-cursor--windsurf) in the primitives matrix.
@@ -103,7 +107,7 @@ npx @cobusgreyling/loop-audit . --badge
 ## Learn the why (optional, 10 minutes)
 
 - [Loop Engineering essay](https://cobusgreyling.substack.com/p/loop-engineering) — concept and primitives
-- [Primitives matrix](./primitives-matrix.md) — Grok vs Claude vs Codex vs Cursor
+- [Primitives matrix](./primitives-matrix.md) — Grok vs Claude vs Codex vs OpenClaw vs Cursor
 - [Operating loops](./operating-loops.md) — when to kill a loop
 
 ---

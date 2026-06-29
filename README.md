@@ -198,6 +198,7 @@ Phased rollout: **L1 report → L2 assisted fixes → L3 unattended** — see [l
 - [Grok](examples/grok/daily-triage.md)
 - [Claude Code](examples/claude-code/)
 - [Codex](examples/codex/)
+- [OpenClaw](examples/openclaw/daily-triage.md)
 - [GitHub Actions](examples/github-actions/)
 
 ## Operating & Safety

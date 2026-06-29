@@ -435,6 +435,7 @@ section {
 .tool-pill.grok { border-color: rgba(62, 232, 197, 0.3); color: var(--accent); }
 .tool-pill.claude { border-color: rgba(255, 179, 71, 0.3); color: var(--accent-warm); }
 .tool-pill.codex { border-color: rgba(91, 157, 255, 0.3); color: var(--accent-2); }
+.tool-pill.openclaw { border-color: rgba(255, 107, 107, 0.35); color: #ff8a7a; }
 
 /* Code block */
 .code-block {
