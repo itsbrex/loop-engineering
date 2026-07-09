@@ -49,6 +49,11 @@ export interface LoopSignals {
         loopMdBudget: boolean;
         budgetSkill: boolean;
     };
+    governance: {
+        toolScope: boolean;
+        stallDetection: boolean;
+        escalation: boolean;
+    };
     constraints: {
         present: boolean;
         hasConstraintsSkill: boolean;

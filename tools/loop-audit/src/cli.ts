@@ -12,7 +12,7 @@ const badge = args.includes('--badge');
 const help = args.includes('--help') || args.includes('-h');
 
 if (help) {
-  console.log(`loop-audit — Loop Readiness Score CLI (v1.4+)
+  console.log(`loop-audit — Loop Readiness Score CLI (v1.6+)
 
 Usage:
   loop-audit [path] [options]
@@ -23,6 +23,9 @@ Options:
   --suggest   Show copy-from-template commands for missing pieces (recommended on first runs)
   --badge     Markdown README badge (Loop Ready level + score)
   --help, -h  This help
+
+New in v1.6:
+  • Governance signals: least-privilege tool scope, stall / no-progress detection, human-escalation path
 
 New in v1.4:
   • Dynamic "loop activity" detection (git history, "Last run" in STATE, scheduled workflows)

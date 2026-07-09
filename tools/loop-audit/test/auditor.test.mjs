@@ -24,6 +24,7 @@ function emptySignals() {
     registry: { present: false },
     constraints: { present: false, hasConstraintsSkill: false },
     cost: { budgetDoc: false, runLog: false, loopMdBudget: false, budgetSkill: false },
+    governance: { toolScope: false, stallDetection: false, escalation: false },
     loopActivity: { present: false, evidence: [] },
   };
 }
@@ -133,6 +134,48 @@ test('auditProject: minimal L1 layout', async () => {
     assert.equal(result.level, 'L1');
     assert.ok(result.signals.triage.present);
     assert.ok(result.signals.stateFile.present);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('computeScore: governance signals add points', () => {
+  const base = emptySignals();
+  const { score: without } = computeScore(base);
+  const withGov = emptySignals();
+  withGov.governance = { toolScope: true, stallDetection: true, escalation: true };
+  const { score: withScore } = computeScore(withGov);
+  assert.equal(withScore - without, 9);
+});
+
+test('auditProject: governance signals detected from docs and skill frontmatter', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-audit-gov-'));
+  try {
+    await writeFile(
+      path.join(dir, 'LOOP.md'),
+      '# Loop\nTool scope: least-privilege per role.\nUses loop-context circuit breaker with max attempts; on no-progress, escalate to a human (exit code 2).\n',
+    );
+    await mkdir(path.join(dir, '.claude', 'skills', 'loop-triage'), { recursive: true });
+    await writeFile(
+      path.join(dir, '.claude', 'skills', 'loop-triage', 'SKILL.md'),
+      '---\nname: loop-triage\ndescription: triage\nallowed-tools: Read, Grep\n---\n# Triage\n',
+    );
+    const result = await auditProject(dir);
+    assert.ok(result.signals.governance.toolScope);
+    assert.ok(result.signals.governance.stallDetection);
+    assert.ok(result.signals.governance.escalation);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('auditProject: governance signals absent in bare project', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-audit-nogov-'));
+  try {
+    const result = await auditProject(dir);
+    assert.equal(result.signals.governance.toolScope, false);
+    assert.equal(result.signals.governance.stallDetection, false);
+    assert.equal(result.signals.governance.escalation, false);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

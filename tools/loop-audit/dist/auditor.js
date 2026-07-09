@@ -31,6 +31,9 @@ const SCORE_WEIGHTS = {
     runLog: 3,
     loopMdBudget: 2,
     budgetSkill: 2,
+    toolScope: 3,
+    stallDetection: 3,
+    escalation: 3,
     constraintsFile: 4,
     constraintsSkill: 2,
     loopActivity: 6,
@@ -58,6 +61,36 @@ const SAFETY_FILES = ['safety.md', 'docs/safety.md', 'SECURITY.md'];
 const MCP_FILES = ['.mcp.json', 'mcp.json', '.mcp/config.json'];
 const WORKTREE_HINTS = ['worktree', 'worktrees', 'git worktree'];
 const BUDGET_HINTS = [/budget/i, /max tokens/i, /token cap/i, /kill switch/i, /loop-pause-all/i];
+// Governance signals (multi-agent safety rubric): least-privilege tool scope,
+// stall / no-progress detection, and an explicit human-escalation path.
+const TOOL_SCOPE_HINTS = [
+    /least[- ]privilege/i,
+    /tool scope/i,
+    /scoped tools?/i,
+    /allow-?list/i,
+    /read-only tools?/i,
+    /permission scope/i,
+];
+const STALL_HINTS = [
+    /loop-context/i,
+    /circuit breaker/i,
+    /max attempts/i,
+    /no[- ]progress/i,
+    /\bstall(ed|s|ing)?\b/i,
+    /\bstuck\b/i,
+    /same error/i,
+];
+const ESCALATION_HINTS = [
+    /escalat/i,
+    /hand[- ]?off/i,
+    /human[- ]in[- ]the[- ]loop/i,
+    /\bHITL\b/i,
+    /human review/i,
+    /needs? human/i,
+    /stop and ask/i,
+    /exit code 2/i,
+    /\bexit 2\b/i,
+];
 async function fileExists(p) {
     try {
         await stat(p);
@@ -233,6 +266,12 @@ export function computeScore(signals) {
         score += w.loopMdBudget;
     if (signals.cost.budgetSkill)
         score += w.budgetSkill;
+    if (signals.governance.toolScope)
+        score += w.toolScope;
+    if (signals.governance.stallDetection)
+        score += w.stallDetection;
+    if (signals.governance.escalation)
+        score += w.escalation;
     if (signals.constraints.present)
         score += w.constraintsFile;
     if (signals.constraints.hasConstraintsSkill)
@@ -364,6 +403,60 @@ export async function auditProject(target) {
             break;
         }
     }
+    // Governance corpus: docs where scope / stall / escalation rules are written.
+    let governanceCorpus = loopMdContent;
+    for (const f of ['docs/safety.md', 'safety.md', 'SECURITY.md', 'loop-constraints.md']) {
+        const p = path.join(root, f);
+        if (await fileExists(p)) {
+            try {
+                governanceCorpus += '\n' + (await readFile(p, 'utf8'));
+            }
+            catch { }
+        }
+    }
+    // allowed-tools frontmatter in any SKILL.md is a concrete least-privilege signal.
+    let skillDeclaresTools = false;
+    const skillScanDirs = [
+        path.join(root, '.grok', 'skills'),
+        path.join(root, '.claude', 'skills'),
+        path.join(root, '.codex', 'skills'),
+        path.join(root, 'skills'),
+    ];
+    for (const dir of skillScanDirs) {
+        if (skillDeclaresTools)
+            break;
+        if (!(await fileExists(dir)))
+            continue;
+        try {
+            const entries = await readdir(dir, { withFileTypes: true });
+            for (const e of entries) {
+                if (!e.isDirectory())
+                    continue;
+                const sp = path.join(dir, e.name, 'SKILL.md');
+                if (await fileExists(sp)) {
+                    const txt = await readFile(sp, 'utf8');
+                    if (/allowed-tools\s*:/i.test(txt)) {
+                        skillDeclaresTools = true;
+                        break;
+                    }
+                }
+            }
+        }
+        catch { }
+    }
+    const toolScope = skillDeclaresTools || TOOL_SCOPE_HINTS.some((re) => re.test(governanceCorpus));
+    // loop-context is this repo's circuit breaker; its ledger is direct proof of stall handling.
+    let ledgerPresent = false;
+    try {
+        const rootEntries = await readdir(root, { withFileTypes: true });
+        ledgerPresent = rootEntries.some((e) => e.isFile() && /ledger/i.test(e.name));
+    }
+    catch { }
+    const stallDetection = skillNames.includes('loop-context') ||
+        skillNames.includes('loop-guard') ||
+        ledgerPresent ||
+        STALL_HINTS.some((re) => re.test(governanceCorpus));
+    const escalation = ESCALATION_HINTS.some((re) => re.test(governanceCorpus));
     const signals = {
         stateFile: { present: statePaths.length > 0, paths: statePaths },
         loopConfig: { present: loopMd, path: loopMd ? 'LOOP.md' : undefined },
@@ -380,6 +473,7 @@ export async function auditProject(target) {
         worktreeEvidence: { present: worktreeEvidence },
         registry: { present: registryPresent },
         cost: { budgetDoc, runLog, loopMdBudget, budgetSkill },
+        governance: { toolScope, stallDetection, escalation },
         loopActivity,
     };
     if (!signals.stateFile.present) {
@@ -480,6 +574,27 @@ export async function auditProject(target) {
     }
     else {
         findings.push({ level: 'ok', message: 'loop-budget skill present.' });
+    }
+    if (!signals.governance.toolScope) {
+        findings.push({ level: 'warn', message: 'No least-privilege tool scope — skills/agents may hold broader tool or MCP access than their role needs.' });
+        recommendations.push('Declare allowed-tools in SKILL.md frontmatter, or document tool/MCP scopes in docs/safety.md (least privilege per role)');
+    }
+    else {
+        findings.push({ level: 'ok', message: 'Tool/MCP scope constrained (least-privilege signal present).' });
+    }
+    if (!signals.governance.stallDetection) {
+        findings.push({ level: 'warn', message: 'No stall / no-progress detection — a stuck loop can repeat the same failing action instead of escalating.' });
+        recommendations.push('Add loop-context (circuit breaker) or a max-attempts / no-progress rule in LOOP.md that escalates instead of looping');
+    }
+    else {
+        findings.push({ level: 'ok', message: 'Stall / no-progress detection present (circuit breaker or documented rule).' });
+    }
+    if (!signals.governance.escalation) {
+        findings.push({ level: 'warn', message: 'No explicit human-escalation path — the loop has no defined hand-off when stuck or out of scope.' });
+        recommendations.push('Document an escalation path in LOOP.md (when to stop and hand to a human; e.g. loop-context exit code 2)');
+    }
+    else {
+        findings.push({ level: 'ok', message: 'Human-escalation path documented.' });
     }
     if (!signals.loopActivity.present) {
         findings.push({ level: 'warn', message: 'No evidence of actual loop runs detected (no "Last run" entries in state, loop-related git activity, or scheduled workflows yet).' });
