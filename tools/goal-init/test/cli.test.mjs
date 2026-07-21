@@ -57,4 +57,32 @@ describe('goal-init cli', () => {
     assert.match(content, /Existing rules/);
     assert.match(content, /Goal Engineering Rules/);
   });
+
+  test('does not overwrite existing GOAL.md', async () => {
+    const fs = await import('node:fs/promises');
+    await fs.writeFile(path.join(testDir, 'GOAL.md'), '# Original Goal\n');
+
+    await exec('node', [CLI, testDir, '--tool', 'grok']);
+    
+    const content = await fs.readFile(path.join(testDir, 'GOAL.md'), 'utf8');
+    assert.equal(content, '# Original Goal\n');
+  });
+
+  test('fails on unknown tool', async () => {
+    try {
+      await exec('node', [CLI, testDir, '--tool', 'invalid-tool']);
+      assert.fail('Should have failed');
+    } catch (err) {
+      assert.match(err.stderr, /Unknown tool: invalid-tool/);
+    }
+  });
+
+  test('dry-run does not write files', async () => {
+    const { stdout } = await exec('node', [CLI, testDir, '--tool', 'grok', '--dry-run']);
+    assert.match(stdout, /would copy:/);
+    
+    // Check files DO NOT exist
+    assert.ok(!(await exists(path.join(testDir, 'GOAL.md'))));
+    assert.ok(!(await exists(path.join(testDir, 'goal-budget.md'))));
+  });
 });

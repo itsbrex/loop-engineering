@@ -175,7 +175,17 @@ Examples:
 
   // 3. Scaffold goal-run-log.md
   if (!(await exists(path.join(targetDir, 'goal-run-log.md')))) {
-    await copyFile(path.join(templatesRoot, 'loop-run-log.md.template'), path.join(targetDir, 'goal-run-log.md'), dryRun);
+    await copyFile(path.join(templatesRoot, 'goal-run-log.md.template'), path.join(targetDir, 'goal-run-log.md'), dryRun);
+  }
+
+  // 3.5 Scaffold docs/safety.md
+  const safetyPath = path.join(targetDir, 'docs', 'safety.md');
+  if (!(await exists(safetyPath)) && !dryRun) {
+    await mkdir(path.dirname(safetyPath), { recursive: true });
+    await writeFile(safetyPath, '# Safety Policy\n\nEnsure any autonomous tools adhere to safety guidelines.\n');
+    console.log('  created: docs/safety.md (stub)');
+  } else if (dryRun) {
+    console.log(`  would create: docs/safety.md (stub)`);
   }
 
   // 4. Scaffold skills

@@ -5,4 +5,4 @@ export function printContributorCta(): void {
   console.log('');
   console.log('Contribute (~15 min tasks):');
   console.log(`  ${CONTRIBUTOR_QUICKSTART_URL}`);
-}
+}
