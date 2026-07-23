@@ -54,6 +54,7 @@ export interface LoopSignals {
         toolScope: boolean;
         stallDetection: boolean;
         escalation: boolean;
+        gateYaml: boolean;
     };
     constraints: {
         present: boolean;

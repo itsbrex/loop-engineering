@@ -1,5 +1,6 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
 import { fileExists } from '@cobusgreyling/readiness-core';
 const STATE_MD_TEMPLATE = `# Loop State — YOUR_PROJECT
 
@@ -146,6 +147,14 @@ const AGENTS_MD_TEMPLATE = `# AGENTS.md — Project Conventions
 - Never auto-merge changes.
 - Ensure all loops isolate their work in worktrees.
 `;
+const GATE_YAML_TEMPLATE = `# gate.yaml - Explicit human approval gates
+
+gates:
+  - name: "Auto-merge to main"
+    description: "Never auto-merge changes to the main branch."
+    required_approvers:
+      - "human"
+`;
 export async function autoFixProject(target, result) {
     const root = path.resolve(target);
     let fixesApplied = 0;
@@ -182,6 +191,26 @@ export async function autoFixProject(target, result) {
     }
     if (!result.signals.agentsMd.present) {
         await safeWriteFile('AGENTS.md', AGENTS_MD_TEMPLATE, 'Project conventions');
+    }
+    if (!result.signals.governance.gateYaml) {
+        await safeWriteFile('gate.yaml', GATE_YAML_TEMPLATE, 'Explicit human approval gates');
+    }
+    const shellFix = (cmd, label) => {
+        console.log(`\n⚙️  Applying ${label}...`);
+        try {
+            execSync(cmd, { stdio: 'inherit', cwd: root });
+            console.log(`✅ Applied ${label}`);
+            fixesApplied++;
+        }
+        catch (err) {
+            console.error(`❌ Failed to apply ${label}:`, err instanceof Error ? err.message : String(err));
+        }
+    };
+    if (!result.signals.memory.tiers) {
+        shellFix('npx @cobusgreyling/loop-init . --with-memory', 'Memory engineering');
+    }
+    if (!result.signals.harness.stack) {
+        shellFix('npx @cobusgreyling/loop-init . --with-foundry', 'Harness foundry');
     }
     if (fixesApplied > 0) {
         console.log(`\n✨ Applied ${fixesApplied} automatic fixes. Run loop-audit again to see your new score!`);

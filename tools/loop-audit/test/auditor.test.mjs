@@ -24,7 +24,7 @@ function emptySignals() {
     registry: { present: false },
     constraints: { present: false, hasConstraintsSkill: false },
     cost: { budgetDoc: false, runLog: false, loopMdBudget: false, budgetSkill: false },
-    governance: { toolScope: false, stallDetection: false, escalation: false },
+    governance: { toolScope: false, stallDetection: false, escalation: false, gateYaml: false },
     loopActivity: { present: false, evidence: [] },
     harness: { stack: false, lock: false, sessions: false, emit: false, host: false },
     memory: { tiers: false, budget: false },
@@ -196,6 +196,15 @@ test('formatBadge: includes level and score', () => {
   assert.match(badge, /Loop Ready L2 \(72\/100\)/);
   assert.match(badge, /img\.shields\.io/);
   assert.match(badge, /loop-engineering/);
+});
+
+test('computeScore: gateYaml adds points', () => {
+  const base = emptySignals();
+  const { score: without } = computeScore(base);
+  const withGate = emptySignals();
+  withGate.governance.gateYaml = true;
+  const { score: withScore } = computeScore(withGate);
+  assert.equal(withScore - without, 3);
 });
 
 test('computeScore: harness signals add points', () => {

@@ -13,7 +13,7 @@ const STATE_FILES = [
 ];
 /** Score contribution for each readiness signal (see computeScore). */
 const SCORE_WEIGHTS = {
-    base: 10,
+    base: 7,
     stateFile: 18,
     triage: 14,
     loopConfig: 9,
@@ -35,6 +35,7 @@ const SCORE_WEIGHTS = {
     toolScope: 3,
     stallDetection: 3,
     escalation: 3,
+    gateYaml: 3,
     constraintsFile: 4,
     constraintsSkill: 2,
     loopActivity: 6,
@@ -256,6 +257,8 @@ export function computeScore(signals) {
         score += w.stallDetection;
     if (signals.governance.escalation)
         score += w.escalation;
+    if (signals.governance.gateYaml)
+        score += w.gateYaml;
     if (signals.constraints.present)
         score += w.constraintsFile;
     if (signals.constraints.hasConstraintsSkill)
@@ -452,6 +455,7 @@ export async function auditProject(target) {
         ledgerPresent ||
         STALL_HINTS.some((re) => re.test(governanceCorpus));
     const escalation = ESCALATION_HINTS.some((re) => re.test(governanceCorpus));
+    const gateYaml = await fileExists(path.join(root, 'gate.yaml'));
     // Harness Runtime (harness-foundry) — versioned stack, sessions/traces, outerloop emit, host bridge
     const foundryStackPath = path.join(root, '.foundry', 'stack.yaml');
     const harnessStack = await fileExists(foundryStackPath);
@@ -512,7 +516,7 @@ export async function auditProject(target) {
         worktreeEvidence: { present: worktreeEvidence },
         registry: { present: registryPresent },
         cost: { budgetDoc, runLog, loopMdBudget, budgetSkill },
-        governance: { toolScope, stallDetection, escalation },
+        governance: { toolScope, stallDetection, escalation, gateYaml },
         loopActivity,
         harness,
         memory,
@@ -622,6 +626,16 @@ export async function auditProject(target) {
     }
     else {
         findings.push({ level: 'ok', message: 'Tool/MCP scope constrained (least-privilege signal present).' });
+    }
+    if (!signals.governance.gateYaml) {
+        findings.push({
+            level: 'warn',
+            message: 'No gate.yaml — explicit human approval gates are not defined for loop-sync.',
+        });
+        recommendations.push('Add gate.yaml to define explicit human approval gates.');
+    }
+    else {
+        findings.push({ level: 'ok', message: 'gate.yaml present (human gates defined).' });
     }
     if (!signals.governance.stallDetection) {
         findings.push({ level: 'warn', message: 'No stall / no-progress detection — a stuck loop can repeat the same failing action instead of escalating.' });

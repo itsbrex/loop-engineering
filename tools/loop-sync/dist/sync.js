@@ -156,6 +156,9 @@ export async function runSync(options) {
         'STATE.md',
         'LOOP.md',
         'AGENTS.md',
+        'gate.yaml',
+        'loop-budget.md',
+        'loop-run-log.md',
     ];
     // Check for missing required files
     for (const file of requiredFiles) {
