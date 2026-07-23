@@ -38,6 +38,11 @@ export interface LoopSignals {
     emit: boolean;
     host: boolean;
   };
+  /** memory-engineering setup (memory-tiers.md, memory-budget.md) */
+  memory: {
+    tiers: boolean;
+    budget: boolean;
+  };
 }
 
 export type { Finding };
@@ -87,6 +92,9 @@ const SCORE_WEIGHTS = {
   harnessSessions: 2,
   harnessEmit: 1,
   harnessHost: 1,
+  /** Memory Engineering (memory-tiers.md, memory-budget.md) */
+  memoryTiers: 4,
+  memoryBudget: 2,
 } as const;
 
 const LEVEL_THRESHOLDS = {
@@ -290,6 +298,8 @@ export function computeScore(signals: LoopSignals): { score: number; level: 'L0'
   if (signals.harness.sessions) score += w.harnessSessions;
   if (signals.harness.emit) score += w.harnessEmit;
   if (signals.harness.host) score += w.harnessHost;
+  if (signals.memory.tiers) score += w.memoryTiers;
+  if (signals.memory.budget) score += w.memoryBudget;
 
   score = Math.min(100, Math.max(0, score));
 
@@ -522,6 +532,11 @@ export async function auditProject(target: string): Promise<AuditResult> {
     host: harnessHost,
   };
 
+  // Memory Engineering (memory-tiers.md, memory-budget.md)
+  const memoryTiers = await fileExists(path.join(root, 'memory-tiers.md'));
+  const memoryBudget = await fileExists(path.join(root, 'memory-budget.md'));
+  const memory = { tiers: memoryTiers, budget: memoryBudget };
+
   const signals: LoopSignals = {
     stateFile: { present: statePaths.length > 0, paths: statePaths },
     loopConfig: { present: loopMd, path: loopMd ? 'LOOP.md' : undefined },
@@ -541,6 +556,7 @@ export async function auditProject(target: string): Promise<AuditResult> {
     governance: { toolScope, stallDetection, escalation },
     loopActivity,
     harness,
+    memory,
   };
 
   if (!signals.stateFile.present) {
@@ -709,11 +725,36 @@ export async function auditProject(target: string): Promise<AuditResult> {
     }
   }
 
+  if (!signals.memory.tiers) {
+    findings.push({
+      level: 'warn',
+      message: 'No memory-tiers.md — memory engineering tiers are not defined.',
+    });
+    recommendations.push('Scaffold memory tiers: npx @cobusgreyling/loop-init . --with-memory');
+  } else {
+    findings.push({ level: 'ok', message: 'Memory tiers defined (memory-tiers.md).' });
+    if (!signals.memory.budget) {
+      findings.push({
+        level: 'warn',
+        message: 'Memory tiers defined but no memory-budget.md — recall budget is missing.',
+      });
+      recommendations.push('Add memory-budget.md to cap retrieval costs.');
+    } else {
+      findings.push({ level: 'ok', message: 'Memory budget defined.' });
+    }
+  }
+
   const { score, level, assessment } = computeScore(signals);
 
   if (score >= 80 && !signals.harness.stack) {
     recommendations.unshift(
       'Loop Ready 80+: version this loop as a harness — npx @cobusgreyling/loop-init . --with-foundry · showcase https://github.com/cobusgreyling/harness-foundry/blob/main/docs/showcase.md',
+    );
+  }
+
+  if (score >= 80 && !signals.memory.tiers) {
+    recommendations.unshift(
+      "Loop Ready 80+: version this loop's memory — npx @cobusgreyling/loop-init . --with-memory",
     );
   }
 

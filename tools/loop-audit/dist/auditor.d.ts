@@ -71,6 +71,11 @@ export interface LoopSignals {
         emit: boolean;
         host: boolean;
     };
+    /** memory-engineering setup (memory-tiers.md, memory-budget.md) */
+    memory: {
+        tiers: boolean;
+        budget: boolean;
+    };
 }
 export type { Finding };
 export interface AuditResult extends BaseAuditResult<'L0' | 'L1' | 'L2' | 'L3', LoopSignals> {

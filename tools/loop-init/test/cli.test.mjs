@@ -248,3 +248,43 @@ test('loop-init --help documents --with-foundry', async () => {
   assert.match(stdout, /--with-foundry/);
   assert.match(stdout, /harness-foundry|implementer|minimal/);
 });
+
+test('loop-init prints memory CTA without --with-memory', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-init-mem-cta-'));
+  try {
+    const { stdout } = await exec('node', [CLI, dir, '--pattern', 'daily-triage', '--tool', 'grok']);
+    assert.match(stdout, /--with-memory/);
+    assert.match(stdout, /memory-engineering/);
+    await assert.rejects(() => access(path.join(dir, 'memory-tiers.md')));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('loop-init --with-memory scaffolds tiers and budget', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-init-memory-'));
+  try {
+    const { stdout } = await exec('node', [
+      CLI,
+      dir,
+      '--pattern',
+      'daily-triage',
+      '--tool',
+      'grok',
+      '--with-memory',
+    ]);
+    await access(path.join(dir, 'memory-tiers.md'));
+    await access(path.join(dir, 'memory-budget.md'));
+    const tiers = await readFile(path.join(dir, 'memory-tiers.md'), 'utf8');
+    assert.match(tiers, /Working Memory/);
+    assert.match(stdout, /Memory engineering stack ready/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('loop-init --help documents --with-memory', async () => {
+  const { stdout } = await exec('node', [CLI, '--help']);
+  assert.match(stdout, /--with-memory/);
+  assert.match(stdout, /memory-engineering tiers and budget/);
+});

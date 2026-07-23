@@ -27,6 +27,7 @@ function emptySignals() {
     governance: { toolScope: false, stallDetection: false, escalation: false },
     loopActivity: { present: false, evidence: [] },
     harness: { stack: false, lock: false, sessions: false, emit: false, host: false },
+    memory: { tiers: false, budget: false },
   };
 }
 
@@ -233,6 +234,26 @@ test('auditProject: missing harness recommends --with-foundry', async () => {
     const result = await auditProject(dir);
     assert.equal(result.signals.harness.stack, false);
     assert.ok(result.recommendations.some((r) => r.includes('--with-foundry') || r.includes('harness-foundry')));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('computeScore: memory signals add points', () => {
+  const base = emptySignals();
+  const { score: without } = computeScore(base);
+  const withMemory = emptySignals();
+  withMemory.memory = { tiers: true, budget: true };
+  const { score: withScore } = computeScore(withMemory);
+  assert.equal(withScore - without, 6);
+});
+
+test('auditProject: missing memory recommends --with-memory', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-audit-nomemory-'));
+  try {
+    const result = await auditProject(dir);
+    assert.equal(result.signals.memory.tiers, false);
+    assert.ok(result.recommendations.some((r) => r.includes('--with-memory')));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

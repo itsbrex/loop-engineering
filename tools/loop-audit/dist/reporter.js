@@ -56,6 +56,11 @@ export function formatHuman(r) {
         lines.push('Harness stack present — run a session to earn session/trace credit:');
         lines.push('  npx @cobusgreyling/harness-foundry run --goal "Verify harness wiring"');
     }
+    if (r.score >= 80 && !r.signals.memory?.tiers) {
+        lines.push('');
+        lines.push('Next after Loop Ready 80+: add cross-session memory (memory-engineering)');
+        lines.push('  npx @cobusgreyling/loop-init . --with-memory');
+    }
     lines.push('');
     return lines.join('\n');
 }
