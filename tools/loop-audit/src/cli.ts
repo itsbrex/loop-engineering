@@ -2,12 +2,14 @@
 import { auditProject } from './auditor.js';
 import { printContributorCta } from './contributor-cta.js';
 import { formatBadge, formatHuman, formatJson, formatMarkdown } from './reporter.js';
+import { autoFixProject } from './autofixer.js';
 
 const args = process.argv.slice(2);
 const target = args.find((a) => !a.startsWith('-')) || '.';
 const json = args.includes('--json');
 const md = args.includes('--md');
 const suggest = args.includes('--suggest') || args.includes('--fix');
+const autoFix = args.includes('--auto-fix');
 const badge = args.includes('--badge');
 const help = args.includes('--help') || args.includes('-h');
 
@@ -21,6 +23,7 @@ Options:
   --json      JSON output (for CI / scripting)
   --md        Markdown report
   --suggest   Show copy-from-template commands for missing pieces (recommended on first runs)
+  --auto-fix  Auto-heal missing repository structure (STATE, LOOP, budgets, etc.)
   --badge     Markdown README badge (Loop Ready level + score)
   --help, -h  This help
 
@@ -58,7 +61,9 @@ try {
   else if (md) console.log(formatMarkdown(result));
   else console.log(formatHuman(result));
 
-  if (suggest) {
+  if (autoFix) {
+    await autoFixProject(target, result);
+  } else if (suggest) {
     console.log('\n=== Suggested actions (copy & customize) ===');
     console.log('From the root of this repo (or after cloning the reference):');
     console.log('');
