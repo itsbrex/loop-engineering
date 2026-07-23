@@ -44,6 +44,11 @@ export interface LoopSignals {
     tiers: boolean;
     budget: boolean;
   };
+  /** fleet-engineering setup (fleet-registry.md, fleet-inbox.md) */
+  fleet: {
+    registry: boolean;
+    inbox: boolean;
+  };
 }
 
 export type { Finding };
@@ -97,6 +102,9 @@ const SCORE_WEIGHTS = {
   /** Memory Engineering (memory-tiers.md, memory-budget.md) */
   memoryTiers: 4,
   memoryBudget: 2,
+  /** Fleet Engineering (fleet-registry.md, fleet-inbox.md) */
+  fleetRegistry: 4,
+  fleetInbox: 2,
 } as const;
 
 const LEVEL_THRESHOLDS = {
@@ -303,6 +311,8 @@ export function computeScore(signals: LoopSignals): { score: number; level: 'L0'
   if (signals.harness.host) score += w.harnessHost;
   if (signals.memory.tiers) score += w.memoryTiers;
   if (signals.memory.budget) score += w.memoryBudget;
+  if (signals.fleet.registry) score += w.fleetRegistry;
+  if (signals.fleet.inbox) score += w.fleetInbox;
 
   score = Math.min(100, Math.max(0, score));
 
@@ -541,6 +551,11 @@ export async function auditProject(target: string): Promise<AuditResult> {
   const memoryBudget = await fileExists(path.join(root, 'memory-budget.md'));
   const memory = { tiers: memoryTiers, budget: memoryBudget };
 
+  // Fleet Engineering (fleet-registry.md, fleet-inbox.md)
+  const fleetRegistry = await fileExists(path.join(root, 'fleet-registry.md'));
+  const fleetInbox = await fileExists(path.join(root, 'fleet-inbox.md'));
+  const fleet = { registry: fleetRegistry, inbox: fleetInbox };
+
   const signals: LoopSignals = {
     stateFile: { present: statePaths.length > 0, paths: statePaths },
     loopConfig: { present: loopMd, path: loopMd ? 'LOOP.md' : undefined },
@@ -561,6 +576,7 @@ export async function auditProject(target: string): Promise<AuditResult> {
     loopActivity,
     harness,
     memory,
+    fleet,
   };
 
   if (!signals.stateFile.present) {
@@ -758,6 +774,25 @@ export async function auditProject(target: string): Promise<AuditResult> {
     }
   }
 
+  if (!signals.fleet.registry) {
+    findings.push({
+      level: 'warn',
+      message: 'No fleet-registry.md — multi-agent populations and roles are not defined.',
+    });
+    recommendations.push('Scaffold a fleet: npx @cobusgreyling/loop-init . --with-fleet');
+  } else {
+    findings.push({ level: 'ok', message: 'Fleet registry defined (fleet-registry.md).' });
+    if (!signals.fleet.inbox) {
+      findings.push({
+        level: 'warn',
+        message: 'Fleet registry defined but no fleet-inbox.md — agents cannot cross-communicate.',
+      });
+      recommendations.push('Add fleet-inbox.md to enable cross-loop tasks.');
+    } else {
+      findings.push({ level: 'ok', message: 'Fleet inbox defined.' });
+    }
+  }
+
   const { score, level, assessment } = computeScore(signals);
 
   if (score >= 80 && !signals.harness.stack) {
@@ -769,6 +804,12 @@ export async function auditProject(target: string): Promise<AuditResult> {
   if (score >= 80 && !signals.memory.tiers) {
     recommendations.unshift(
       "Loop Ready 80+: version this loop's memory — npx @cobusgreyling/loop-init . --with-memory",
+    );
+  }
+
+  if (score >= 80 && !signals.fleet.registry) {
+    recommendations.unshift(
+      "Loop Ready 80+: version this loop for a fleet — npx @cobusgreyling/loop-init . --with-fleet",
     );
   }
 

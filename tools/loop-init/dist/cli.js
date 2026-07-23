@@ -73,6 +73,7 @@ function parseArgs(argv) {
     let dryRun = false;
     let withFoundry = false;
     let withMemory = false;
+    let withFleet = false;
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--pattern' || a === '-p')
@@ -85,12 +86,14 @@ function parseArgs(argv) {
             withFoundry = true;
         else if (a === '--with-memory')
             withMemory = true;
+        else if (a === '--with-fleet')
+            withFleet = true;
         else if (a === '--help' || a === '-h')
-            return { help: true, pattern, tool, target, dryRun, withFoundry, withMemory };
+            return { help: true, pattern, tool, target, dryRun, withFoundry, withMemory, withFleet };
         else if (!a.startsWith('-'))
             target = a;
     }
-    return { help: false, pattern, tool, target, dryRun, withFoundry, withMemory };
+    return { help: false, pattern, tool, target, dryRun, withFoundry, withMemory, withFleet };
 }
 function foundryStackYaml(stackName, pattern, preset) {
     if (preset === 'implementer') {
@@ -191,6 +194,16 @@ Showcase: ${FOUNDRY_SHOWCASE}
     }
     return { preset, stackFile };
 }
+async function scaffoldFleet(targetDir, templatesRoot, dryRun) {
+    const registryTemplate = path.join(templatesRoot, 'fleet-registry.md');
+    if (await exists(registryTemplate)) {
+        await copyFile(registryTemplate, path.join(targetDir, 'fleet-registry.md'), dryRun);
+    }
+    const inboxTemplate = path.join(templatesRoot, 'fleet-inbox.md');
+    if (await exists(inboxTemplate)) {
+        await copyFile(inboxTemplate, path.join(targetDir, 'fleet-inbox.md'), dryRun);
+    }
+}
 async function scaffoldMemory(targetDir, templatesRoot, dryRun) {
     const tiersTemplate = path.join(templatesRoot, 'memory-tiers.md');
     const tiersDest = path.join(targetDir, 'memory-tiers.md');
@@ -223,6 +236,19 @@ function printFoundryCta(opts) {
     if (highReady) {
         console.log(`  Showcase: ${FOUNDRY_SHOWCASE}`);
     }
+}
+function printFleetCta(opts) {
+    const { pattern, tool, withFleet, score } = opts;
+    console.log('');
+    if (withFleet) {
+        console.log('Fleet engineering stack ready (fleet-registry.md, fleet-inbox.md)');
+        return;
+    }
+    const highReady = score !== null && score >= 80;
+    console.log(highReady
+        ? 'Next after Loop Ready 80+: version this loop for a fleet (fleet-engineering)'
+        : 'Optional: add fleet-engineering for multi-agent populations');
+    console.log(`  npx @cobusgreyling/loop-init . --pattern ${pattern} --tool ${tool} --with-fleet`);
 }
 function printMemoryCta(opts) {
     const { pattern, tool, withMemory, score } = opts;
@@ -564,6 +590,7 @@ Options:
   -t, --tool        Tool target (default: grok)
   --with-foundry    Also scaffold .foundry/ stack (harness-foundry runtime)
   --with-memory     Also scaffold memory-engineering tiers and budget
+  --with-fleet      Also scaffold fleet-engineering registry and inbox
   --dry-run         Print actions without copying
   -h, --help        This help
 
@@ -577,10 +604,11 @@ Examples:
   npx @cobusgreyling/loop-init . -p pr-babysitter -t claude --with-foundry
   npx @cobusgreyling/loop-init . -p daily-triage -t opencode
   npx @cobusgreyling/loop-init . --with-memory
+  npx @cobusgreyling/loop-init . --with-fleet
 `);
         process.exit(0);
     }
-    const { pattern, tool, target, dryRun, withFoundry, withMemory } = args;
+    const { pattern, tool, target, dryRun, withFoundry, withMemory, withFleet } = args;
     const validPatterns = Object.keys(PATTERN_STARTERS);
     const validTools = Object.keys(TOOL_SUFFIX);
     if (!validPatterns.includes(pattern)) {
@@ -705,6 +733,11 @@ npm run lint
         console.log('Memory engineering:');
         await scaffoldMemory(targetDir, templatesRoot, dryRun);
     }
+    if (withFleet) {
+        console.log('');
+        console.log('Fleet engineering:');
+        await scaffoldFleet(targetDir, templatesRoot, dryRun);
+    }
     const auditArg = auditTargetArg(target, targetDir);
     let auditScore = null;
     if (!dryRun) {
@@ -749,6 +782,12 @@ npm run lint
         pattern,
         tool,
         withMemory,
+        score: auditScore,
+    });
+    printFleetCta({
+        pattern,
+        tool,
+        withFleet,
         score: auditScore,
     });
     printContributorCta();

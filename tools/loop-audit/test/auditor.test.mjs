@@ -28,6 +28,7 @@ function emptySignals() {
     loopActivity: { present: false, evidence: [] },
     harness: { stack: false, lock: false, sessions: false, emit: false, host: false },
     memory: { tiers: false, budget: false },
+    fleet: { registry: false, inbox: false },
   };
 }
 
@@ -263,6 +264,26 @@ test('auditProject: missing memory recommends --with-memory', async () => {
     const result = await auditProject(dir);
     assert.equal(result.signals.memory.tiers, false);
     assert.ok(result.recommendations.some((r) => r.includes('--with-memory')));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('computeScore: fleet signals add points', () => {
+  const base = emptySignals();
+  const { score: without } = computeScore(base);
+  const withFleet = emptySignals();
+  withFleet.fleet = { registry: true, inbox: true };
+  const { score: withScore } = computeScore(withFleet);
+  assert.equal(withScore - without, 6);
+});
+
+test('auditProject: missing fleet recommends --with-fleet', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-audit-nofleet-'));
+  try {
+    const result = await auditProject(dir);
+    assert.equal(result.signals.fleet.registry, false);
+    assert.ok(result.recommendations.some((r) => r.includes('--with-fleet')));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

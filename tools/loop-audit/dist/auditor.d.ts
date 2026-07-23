@@ -77,6 +77,11 @@ export interface LoopSignals {
         tiers: boolean;
         budget: boolean;
     };
+    /** fleet-engineering setup (fleet-registry.md, fleet-inbox.md) */
+    fleet: {
+        registry: boolean;
+        inbox: boolean;
+    };
 }
 export type { Finding };
 export interface AuditResult extends BaseAuditResult<'L0' | 'L1' | 'L2' | 'L3', LoopSignals> {

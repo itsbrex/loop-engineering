@@ -61,6 +61,11 @@ export function formatHuman(r) {
         lines.push('Next after Loop Ready 80+: add cross-session memory (memory-engineering)');
         lines.push('  npx @cobusgreyling/loop-init . --with-memory');
     }
+    if (r.score >= 80 && !r.signals.fleet?.registry) {
+        lines.push('');
+        lines.push('Next after Loop Ready 80+: version this loop for a fleet (fleet-engineering)');
+        lines.push('  npx @cobusgreyling/loop-init . --with-fleet');
+    }
     lines.push('');
     return lines.join('\n');
 }

@@ -288,3 +288,43 @@ test('loop-init --help documents --with-memory', async () => {
   assert.match(stdout, /--with-memory/);
   assert.match(stdout, /memory-engineering tiers and budget/);
 });
+
+test('loop-init prints fleet CTA without --with-fleet', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-init-fleet-cta-'));
+  try {
+    const { stdout } = await exec('node', [CLI, dir, '--pattern', 'daily-triage', '--tool', 'grok']);
+    assert.match(stdout, /--with-fleet/);
+    assert.match(stdout, /fleet-engineering/);
+    await assert.rejects(() => access(path.join(dir, 'fleet-registry.md')));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('loop-init --with-fleet scaffolds registry and inbox', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'loop-init-fleet-'));
+  try {
+    const { stdout } = await exec('node', [
+      CLI,
+      dir,
+      '--pattern',
+      'daily-triage',
+      '--tool',
+      'grok',
+      '--with-fleet',
+    ]);
+    await access(path.join(dir, 'fleet-registry.md'));
+    await access(path.join(dir, 'fleet-inbox.md'));
+    const registry = await readFile(path.join(dir, 'fleet-registry.md'), 'utf8');
+    assert.match(registry, /Fleet Registry/);
+    assert.match(stdout, /Fleet engineering stack ready/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('loop-init --help documents --with-fleet', async () => {
+  const { stdout } = await exec('node', [CLI, '--help']);
+  assert.match(stdout, /--with-fleet/);
+  assert.match(stdout, /fleet-engineering registry and inbox/);
+});

@@ -101,6 +101,7 @@ function parseArgs(argv: string[]) {
   let dryRun = false;
   let withFoundry = false;
   let withMemory = false;
+  let withFleet = false;
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -109,12 +110,13 @@ function parseArgs(argv: string[]) {
     else if (a === '--dry-run') dryRun = true;
     else if (a === '--with-foundry') withFoundry = true;
     else if (a === '--with-memory') withMemory = true;
+    else if (a === '--with-fleet') withFleet = true;
     else if (a === '--help' || a === '-h')
-      return { help: true as const, pattern, tool, target, dryRun, withFoundry, withMemory };
+      return { help: true as const, pattern, tool, target, dryRun, withFoundry, withMemory, withFleet };
     else if (!a.startsWith('-')) target = a;
   }
 
-  return { help: false as const, pattern, tool, target, dryRun, withFoundry, withMemory };
+  return { help: false as const, pattern, tool, target, dryRun, withFoundry, withMemory, withFleet };
 }
 
 function foundryStackYaml(stackName: string, pattern: Pattern, preset: FoundryPreset): string {
@@ -227,6 +229,21 @@ Showcase: ${FOUNDRY_SHOWCASE}
   return { preset, stackFile };
 }
 
+async function scaffoldFleet(
+  targetDir: string,
+  templatesRoot: string,
+  dryRun: boolean,
+) {
+  const registryTemplate = path.join(templatesRoot, 'fleet-registry.md');
+  if (await exists(registryTemplate)) {
+    await copyFile(registryTemplate, path.join(targetDir, 'fleet-registry.md'), dryRun);
+  }
+  const inboxTemplate = path.join(templatesRoot, 'fleet-inbox.md');
+  if (await exists(inboxTemplate)) {
+    await copyFile(inboxTemplate, path.join(targetDir, 'fleet-inbox.md'), dryRun);
+  }
+}
+
 async function scaffoldMemory(
   targetDir: string,
   templatesRoot: string,
@@ -278,6 +295,30 @@ function printFoundryCta(opts: {
   if (highReady) {
     console.log(`  Showcase: ${FOUNDRY_SHOWCASE}`);
   }
+}
+
+function printFleetCta(opts: {
+  pattern: Pattern;
+  tool: Tool;
+  withFleet: boolean;
+  score: number | null;
+}) {
+  const { pattern, tool, withFleet, score } = opts;
+  console.log('');
+  if (withFleet) {
+    console.log('Fleet engineering stack ready (fleet-registry.md, fleet-inbox.md)');
+    return;
+  }
+
+  const highReady = score !== null && score >= 80;
+  console.log(
+    highReady
+      ? 'Next after Loop Ready 80+: version this loop for a fleet (fleet-engineering)'
+      : 'Optional: add fleet-engineering for multi-agent populations',
+  );
+  console.log(
+    `  npx @cobusgreyling/loop-init . --pattern ${pattern} --tool ${tool} --with-fleet`,
+  );
 }
 
 function printMemoryCta(opts: {
@@ -693,6 +734,7 @@ Options:
   -t, --tool        Tool target (default: grok)
   --with-foundry    Also scaffold .foundry/ stack (harness-foundry runtime)
   --with-memory     Also scaffold memory-engineering tiers and budget
+  --with-fleet      Also scaffold fleet-engineering registry and inbox
   --dry-run         Print actions without copying
   -h, --help        This help
 
@@ -706,11 +748,12 @@ Examples:
   npx @cobusgreyling/loop-init . -p pr-babysitter -t claude --with-foundry
   npx @cobusgreyling/loop-init . -p daily-triage -t opencode
   npx @cobusgreyling/loop-init . --with-memory
+  npx @cobusgreyling/loop-init . --with-fleet
 `);
     process.exit(0);
   }
 
-  const { pattern, tool, target, dryRun, withFoundry, withMemory } = args;
+  const { pattern, tool, target, dryRun, withFoundry, withMemory, withFleet } = args;
 
   const validPatterns = Object.keys(PATTERN_STARTERS) as Pattern[];
   const validTools = Object.keys(TOOL_SUFFIX) as Tool[];
@@ -857,6 +900,12 @@ npm run lint
     await scaffoldMemory(targetDir, templatesRoot, dryRun);
   }
 
+  if (withFleet) {
+    console.log('');
+    console.log('Fleet engineering:');
+    await scaffoldFleet(targetDir, templatesRoot, dryRun);
+  }
+
   const auditArg = auditTargetArg(target, targetDir);
   let auditScore: number | null = null;
 
@@ -904,6 +953,12 @@ npm run lint
     pattern,
     tool,
     withMemory,
+    score: auditScore,
+  });
+  printFleetCta({
+    pattern,
+    tool,
+    withFleet,
     score: auditScore,
   });
   printContributorCta();
