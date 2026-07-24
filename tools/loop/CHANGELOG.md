@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Restore public name `@cobusgreyling/loop` after temporary loop-cli experiment
+- Docs and bin `loop` aligned with live 0.1.0
+
 ## 0.1.1
 
 - Confirm public package name `@cobusgreyling/loop` (bin `loop`)

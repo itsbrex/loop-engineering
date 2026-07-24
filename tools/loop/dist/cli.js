@@ -7,7 +7,7 @@ import { runTool } from './pass-through.js';
 import { runDoctor, formatDoctorHuman } from './doctor.js';
 import { runStatus, formatStatusHuman } from './status.js';
 import { defaultPlan, executePlan, printNonInteractiveHelp, resolvePattern, resolveTool, runInteractiveWizard, } from './wizard.js';
-const VERSION = '0.1.1';
+const VERSION = '0.1.2';
 const PASS_THROUGH = new Set([
     'init',
     'audit',
