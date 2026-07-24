@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @cobusgreyling/loop — unified front door for Loop Engineering CLIs.
+ * @cobusgreyling/loop-cli — unified front door for Loop Engineering CLIs.
  * Additive: loop-init, loop-audit, and siblings stay fully supported.
  */
 import { runTool } from './pass-through.js';
@@ -16,7 +16,7 @@ import {
   type WizardPlan,
 } from './wizard.js';
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 
 const PASS_THROUGH = new Set([
   'init',
@@ -46,8 +46,8 @@ Usage:
   loop context|worktree|gate|mcp|sandbox [args…]
 
 Week-one (recommended):
-  npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
-  npx @cobusgreyling/loop doctor .
+  npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok
+  npx @cobusgreyling/loop-cli doctor .
 
 Doctor exit codes:
   0  healthy
