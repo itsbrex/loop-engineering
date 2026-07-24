@@ -68,8 +68,12 @@ See [docs/multi-loop.md](docs/multi-loop.md). Priority: CI Sweeper → PR Babysi
 ## How to run locally
 
 ```bash
+# Front door (after build or npm publish)
+node tools/loop/dist/cli.js doctor .
+node tools/loop/dist/cli.js status .
 node tools/loop-audit/dist/cli.js . --suggest
-npx @cobusgreyling/loop-init . --pattern daily-triage --tool grok  # after npm publish
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok  # after npm publish
+# same as: npx @cobusgreyling/loop-init . --pattern daily-triage --tool grok
 bash scripts/before-after-demo.sh
 ```
 
