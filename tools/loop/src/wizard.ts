@@ -108,12 +108,12 @@ export function printNonInteractiveHelp(): void {
   console.log(formatWizardBanner());
   console.log(`Week-one path (copy/paste):
 
-  npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok
-  npx @cobusgreyling/loop-cli doctor .
+  npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
+  npx @cobusgreyling/loop doctor .
 
 Or pick a pain point, then scaffold:
 
-${PAIN_OPTIONS.map((p) => `  ${p.id}. ${p.label}\n     npx @cobusgreyling/loop-cli init . -p ${p.pattern} -t grok`).join('\n\n')}
+${PAIN_OPTIONS.map((p) => `  ${p.id}. ${p.label}\n     npx @cobusgreyling/loop init . -p ${p.pattern} -t grok`).join('\n\n')}
 
 Commands:
   loop init|audit|cost|sync|doctor|status|badge|wizard

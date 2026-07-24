@@ -1,10 +1,10 @@
-# @cobusgreyling/loop-cli
+# @cobusgreyling/loop
 
 **Unified front door** for [Loop Engineering](https://github.com/cobusgreyling/loop-engineering) CLIs.
 
 ```bash
-npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok
-npx @cobusgreyling/loop-cli doctor .
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
+npx @cobusgreyling/loop doctor .
 ```
 
 This package does **not** replace `loop-init`, `loop-audit`, or the other tools. It wraps them and adds **doctor** + **status** so week-one activation is one mental model.
@@ -28,16 +28,16 @@ This package does **not** replace `loop-init`, `loop-audit`, or the other tools.
 
 ```bash
 # 1. Scaffold (report-only)
-npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
 
 # 2. One health check
-npx @cobusgreyling/loop-cli doctor .
+npx @cobusgreyling/loop doctor .
 
 # 3. Optional cost estimate
-npx @cobusgreyling/loop-cli cost -p daily-triage -l L1 -c 1d
+npx @cobusgreyling/loop cost -p daily-triage -l L1 -c 1d
 
 # 4. Day-2 dashboard
-npx @cobusgreyling/loop-cli status .
+npx @cobusgreyling/loop status .
 ```
 
 ### Doctor exit codes
@@ -49,8 +49,8 @@ npx @cobusgreyling/loop-cli status .
 | `2` | Blocked (score &lt; 40, critical drift, or not scaffolded) |
 
 ```bash
-npx @cobusgreyling/loop-cli doctor . --json
-npx @cobusgreyling/loop-cli status . --json
+npx @cobusgreyling/loop doctor . --json
+npx @cobusgreyling/loop status . --json
 ```
 
 ## Compatibility (old doors stay open)
