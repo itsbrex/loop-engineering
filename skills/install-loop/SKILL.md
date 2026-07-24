@@ -2,7 +2,7 @@
 name: install-loop
 description: >
   Install Loop Engineering into a project via the unified CLI front door
-  (@cobusgreyling/loop-cli). Prefer this over invoking loop-init / loop-audit
+  (@cobusgreyling/loop). Prefer this over invoking loop-init / loop-audit
   separately. Week-one is report-only; never enable auto-merge or unattended
   fixes unless the human explicitly asks and doctor is healthy.
 ---
@@ -14,7 +14,7 @@ description: >
 Leave the repo with a scaffolded **report-only** loop, a **Loop Ready** score, and clear next actions — using the **single** CLI:
 
 ```bash
-npx @cobusgreyling/loop-cli
+npx @cobusgreyling/loop
 ```
 
 Do **not** deprecate or remove existing `loop-init` / `loop-audit` usages you find; both doors stay valid. Prefer `loop` for new work.
@@ -24,8 +24,8 @@ Do **not** deprecate or remove existing `loop-init` / `loop-audit` usages you fi
 1. **Detect context**
    - If `LOOP.md` or `STATE.md` already exists, run doctor only (skip init unless human asks to re-scaffold):
      ```bash
-     npx @cobusgreyling/loop-cli doctor . --json
-     npx @cobusgreyling/loop-cli status .
+     npx @cobusgreyling/loop doctor . --json
+     npx @cobusgreyling/loop status .
      ```
    - Otherwise continue.
 
@@ -44,26 +44,26 @@ Do **not** deprecate or remove existing `loop-init` / `loop-audit` usages you fi
 
 4. **Scaffold**
    ```bash
-   npx @cobusgreyling/loop-cli init . --pattern <pattern> --tool <tool>
+   npx @cobusgreyling/loop init . --pattern <pattern> --tool <tool>
    ```
    Optional harness (only if human wants Foundry): add `--with-foundry`.
 
 5. **Doctor**
    ```bash
-   npx @cobusgreyling/loop-cli doctor .
+   npx @cobusgreyling/loop doctor .
    ```
    - Exit `0` = healthy · `1` = warnings · `2` = blocked  
    - Follow the **top 3** printed actions; do not invent extra architecture.
 
 6. **Cost check** before high-cadence schedules:
    ```bash
-   npx @cobusgreyling/loop-cli cost -p <pattern> -l L1 -c 1d
+   npx @cobusgreyling/loop cost -p <pattern> -l L1 -c 1d
    ```
 
 7. **Week-one rule**
    - Report only. No auto-fix, no auto-merge.
    - Tell the human the first `/loop` or scheduler command from init output.
-   - Suggest badge only when score is strong: `npx @cobusgreyling/loop-cli badge .`
+   - Suggest badge only when score is strong: `npx @cobusgreyling/loop badge .`
 
 ## Compatibility
 

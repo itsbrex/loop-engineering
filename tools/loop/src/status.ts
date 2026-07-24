@@ -75,13 +75,13 @@ export async function runStatus(target: string): Promise<StatusReport> {
     patterns.unshift(recentRuns[0].pattern);
   }
 
-  let nextHint = 'Run: npx @cobusgreyling/loop-cli doctor .';
+  let nextHint = 'Run: npx @cobusgreyling/loop doctor .';
   if (!stateName && !loopRaw) {
-    nextHint = 'Scaffold: npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok';
+    nextHint = 'Scaffold: npx @cobusgreyling/loop init . --pattern daily-triage --tool grok';
   } else if (recentRuns.length === 0) {
     nextHint = 'Schedule a report-only first run and append loop-run-log.md';
   } else if (readyScore !== null && readyScore >= 80) {
-    nextHint = 'Optional: npx @cobusgreyling/loop-cli badge .  ·  harness: loop init . --with-foundry';
+    nextHint = 'Optional: npx @cobusgreyling/loop badge .  ·  harness: loop init . --with-foundry';
   }
 
   return {

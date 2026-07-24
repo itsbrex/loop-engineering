@@ -8,7 +8,7 @@ Landed from [X](https://x.com), the [showcase](https://cobusgreyling.github.io/l
 
 **Week one rule:** report only. No auto-fix, no auto-merge. Read what the loop writes before you let it act.
 
-**Front door:** prefer the unified CLI (`@cobusgreyling/loop-cli`). Dedicated packages (`loop-init`, `loop-audit`, …) stay fully supported — see [cli-front-door.md](./cli-front-door.md).
+**Front door:** prefer the unified CLI (`@cobusgreyling/loop`). Dedicated packages (`loop-init`, `loop-audit`, …) stay fully supported — see [cli-front-door.md](./cli-front-door.md).
 
 ## 1. Pick your pain (30 seconds)
 
@@ -21,11 +21,11 @@ Or start with **Daily Triage** if you just want to learn loop discipline with lo
 Run this in the root of any git project (no clone required):
 
 ```bash
-npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
 # One health check (audit + sync + top 3 actions):
-npx @cobusgreyling/loop-cli doctor .
+npx @cobusgreyling/loop doctor .
 # Optional one-command funnel into harness-foundry:
-npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok --with-foundry
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok --with-foundry
 ```
 
 Equivalent (old door, still supported):
@@ -37,7 +37,7 @@ npx @cobusgreyling/loop-init . --pattern daily-triage --tool grok
 Swap `--pattern` for any pattern from [patterns/registry.yaml](../patterns/registry.yaml). List all patterns:
 
 ```bash
-npx @cobusgreyling/loop-cli init --help
+npx @cobusgreyling/loop init --help
 ```
 
 ### Which `--tool` values work?
@@ -57,7 +57,7 @@ npx @cobusgreyling/loop-cli init --help
 ## 3. Check cost before you schedule (30 seconds)
 
 ```bash
-npx @cobusgreyling/loop-cli cost --pattern daily-triage --level L1 --cadence 1d
+npx @cobusgreyling/loop cost --pattern daily-triage --level L1 --cadence 1d
 # same as: npx @cobusgreyling/loop-cost --pattern daily-triage --level L1 --cadence 1d
 ```
 
@@ -68,7 +68,7 @@ Adjust `--pattern`, `--level` (L1 → L2 → L3), and `--cadence` to match what 
 When a loop starts fixing code unattended, wire a **circuit breaker** so it escalates instead of retrying the same failure forever. `loop-init` scaffolds `loop-ledger.json` and a `loop-guard` skill for fix-capable patterns; check the ledger before each retry:
 
 ```bash
-npx @cobusgreyling/loop-cli context --check --ledger loop-ledger.json
+npx @cobusgreyling/loop context --check --ledger loop-ledger.json
 # same as: npx @cobusgreyling/loop-context --check --ledger loop-ledger.json
 ```
 
@@ -78,21 +78,21 @@ Exit `0` = continue · `2` = escalate to a human. The breaker trips on max itera
 
 ```bash
 # Prefer doctor for day-to-day (includes audit + sync)
-npx @cobusgreyling/loop-cli doctor .
+npx @cobusgreyling/loop doctor .
 # Or audit alone:
-npx @cobusgreyling/loop-cli audit . --suggest
+npx @cobusgreyling/loop audit . --suggest
 ```
 
 Scores 0–100 with concrete next steps. Re-run after each improvement. Paste a badge when you're proud of the score:
 
 ```bash
-npx @cobusgreyling/loop-cli badge .
+npx @cobusgreyling/loop badge .
 ```
 
 When the score is **≥ 80**, audit (and `loop init`) nudge you to version the loop as a [harness-foundry](https://github.com/cobusgreyling/harness-foundry) stack — declarative runtime, traces, outerloop emit:
 
 ```bash
-npx @cobusgreyling/loop-cli init . --with-foundry
+npx @cobusgreyling/loop init . --with-foundry
 npx @cobusgreyling/harness-foundry validate
 npx @cobusgreyling/harness-foundry run --goal "Verify harness wiring"
 ```
@@ -102,7 +102,7 @@ npx @cobusgreyling/harness-foundry run --goal "Verify harness wiring"
 `loop audit` scores readiness; `loop sync` checks that your `STATE.md` and `LOOP.md` still agree. When they drift — you edit `LOOP.md` to add a loop but never wire it into `STATE.md`, or a starter update leaves one file behind — a scheduled loop can run against stale instructions. `loop doctor` runs this for you.
 
 ```bash
-npx @cobusgreyling/loop-cli sync .
+npx @cobusgreyling/loop sync .
 # same as: npx @cobusgreyling/loop-sync .
 ```
 
