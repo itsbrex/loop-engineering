@@ -138,13 +138,13 @@ export async function runDoctor(target: string): Promise<DoctorReport> {
     actions.push({
       priority: 1,
       text: 'Scaffold a first loop (report-only week one)',
-      command: 'npx @cobusgreyling/loop init . --pattern daily-triage --tool grok',
+      command: 'npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok',
     });
   } else if (!stateName) {
     actions.push({
       priority: 2,
       text: 'Add a state file (STATE.md or pattern state)',
-      command: 'npx @cobusgreyling/loop init . --pattern daily-triage --tool grok',
+      command: 'npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok',
     });
   }
   if (!loopMd) {
@@ -157,7 +157,7 @@ export async function runDoctor(target: string): Promise<DoctorReport> {
     actions.push({
       priority: 10,
       text: 'Add loop-budget.md with daily token caps and kill switch',
-      command: 'npx @cobusgreyling/loop init . --pattern daily-triage --tool grok',
+      command: 'npx @cobusgreyling/loop-cli init . --pattern daily-triage --tool grok',
     });
   }
   if (!runLog) {
@@ -170,14 +170,14 @@ export async function runDoctor(target: string): Promise<DoctorReport> {
     actions.push({
       priority: 5,
       text: 'Raise Loop Ready above 40 before scheduling unattended work',
-      command: `npx @cobusgreyling/loop audit ${target} --suggest`,
+      command: `npx @cobusgreyling/loop-cli audit ${target} --suggest`,
     });
   }
   if (syncLevel === 'critical') {
     actions.push({
       priority: 4,
       text: 'Fix STATE ↔ LOOP drift before the next scheduled run',
-      command: `npx @cobusgreyling/loop sync ${target}`,
+      command: `npx @cobusgreyling/loop-cli sync ${target}`,
     });
   }
   for (const rec of auditRecs.slice(0, 3)) {
@@ -187,12 +187,12 @@ export async function runDoctor(target: string): Promise<DoctorReport> {
     actions.push({
       priority: 90,
       text: 'Optional next: version the loop as a harness (Foundry)',
-      command: 'npx @cobusgreyling/loop init . --with-foundry',
+      command: 'npx @cobusgreyling/loop-cli init . --with-foundry',
     });
     actions.push({
       priority: 91,
       text: 'Share your score',
-      command: `npx @cobusgreyling/loop badge ${target}`,
+      command: `npx @cobusgreyling/loop-cli badge ${target}`,
     });
   }
 

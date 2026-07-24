@@ -1,10 +1,10 @@
 # Release playbook — npm packages
 
-This repo ships public npm packages from `tools/`. **Front door for users:** `@cobusgreyling/loop` ([cli-front-door.md](./cli-front-door.md)). Sibling packages stay published and supported.
+This repo ships public npm packages from `tools/`. **Front door for users:** `@cobusgreyling/loop-cli` ([cli-front-door.md](./cli-front-door.md)). Sibling packages stay published and supported.
 
 | Package | Directory | Release tag |
 |---------|-----------|-------------|
-| `@cobusgreyling/loop` | `tools/loop` | `loop-v*` |
+| `@cobusgreyling/loop-cli` | `tools/loop` | `loop-v*` |
 | `@cobusgreyling/readiness-core` | `tools/readiness-core` | `readiness-core-v*` |
 | `@cobusgreyling/loop-audit` | `tools/loop-audit` | `loop-audit-v*` |
 | `@cobusgreyling/loop-init` | `tools/loop-init` | `loop-init-v*` |
@@ -23,7 +23,7 @@ Link npm to GitHub, then for **each package** on [npmjs.com](https://www.npmjs.c
 
 | Package | Repository | Workflow filename |
 |---------|--------------|-------------------|
-| `@cobusgreyling/loop` | `cobusgreyling/loop-engineering` | `release-loop.yml` |
+| `@cobusgreyling/loop-cli` | `cobusgreyling/loop-engineering` | `release-loop.yml` |
 | `@cobusgreyling/readiness-core` | `cobusgreyling/loop-engineering` | `release-readiness-core.yml` |
 | `@cobusgreyling/loop-audit` | `cobusgreyling/loop-engineering` | `release-loop-audit.yml` |
 | `@cobusgreyling/loop-init` | `cobusgreyling/loop-engineering` | `release-loop-init.yml` |

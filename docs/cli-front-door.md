@@ -1,4 +1,4 @@
-# CLI front door — `@cobusgreyling/loop`
+# CLI front door — `@cobusgreyling/loop-cli`
 
 > **Additive.** Old packages stay fully supported. This is the recommended entry for new users, forks, and agents.
 
@@ -6,15 +6,15 @@
 
 Loop Engineering ships several focused CLIs (`loop-init`, `loop-audit`, `loop-cost`, …). That is great for maintainers; it is hard for first-time adopters to remember.
 
-`@cobusgreyling/loop` is a **thin umbrella**:
+`@cobusgreyling/loop-cli` is a **thin umbrella**:
 
 1. One binary people can remember  
 2. **Pass-through** to existing tools (same flags)  
 3. **doctor** / **status** for activation and day-2 habit  
 
 ```text
-npx @cobusgreyling/loop init . -p daily-triage -t grok
-npx @cobusgreyling/loop doctor .
+npx @cobusgreyling/loop-cli init . -p daily-triage -t grok
+npx @cobusgreyling/loop-cli doctor .
 ```
 
 ## Map (new → same as before)
@@ -42,7 +42,7 @@ npx @cobusgreyling/loop doctor .
 | 2 | Blocked | hard-fail if you require scaffold |
 
 ```bash
-npx @cobusgreyling/loop doctor . --json
+npx @cobusgreyling/loop-cli doctor . --json
 ```
 
 ## Forks & contributors
