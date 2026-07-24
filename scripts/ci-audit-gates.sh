@@ -20,6 +20,33 @@ npm test
 echo "=== Audit of repo root ==="
 node dist/cli.js "$REPO_ROOT" --json > "$ROOT_AUDIT_FILE"
 echo ""
+
+# Umbrella CLI dogfood (additive — does not replace loop-audit gates)
+echo "=== loop doctor (umbrella front door) ==="
+(
+  cd "$REPO_ROOT/tools/loop-sync"
+  npm ci
+  npm run build
+)
+(
+  cd "$REPO_ROOT/tools/loop"
+  npm ci
+  npm test
+  # Reference repo should not be blocked (exit 2). Warnings (exit 1) are OK.
+  set +e
+  node dist/cli.js doctor "$REPO_ROOT" --json > "$AUDIT_TMP_DIR/doctor.json"
+  DOCTOR_CODE=$?
+  set -e
+  if [ "$DOCTOR_CODE" -ge 2 ]; then
+    echo "loop doctor blocked (exit $DOCTOR_CODE) on reference repo"
+    cat "$AUDIT_TMP_DIR/doctor.json" || true
+    exit 2
+  fi
+  echo "loop doctor exit=$DOCTOR_CODE (0=healthy, 1=warning OK for dogfood)"
+  node dist/cli.js status "$REPO_ROOT" --json > /dev/null
+)
+
+echo ""
 echo "=== Audit of starters (L1 gate) ==="
 FAILED=0
 for s in "$REPO_ROOT"/starters/*/; do

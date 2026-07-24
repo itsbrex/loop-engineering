@@ -10,6 +10,7 @@
 <p align="center">
   <a href="https://github.com/cobusgreyling/loop-engineering/stargazers"><img src="https://img.shields.io/github/stars/cobusgreyling/loop-engineering?style=social" alt="GitHub stars"></a>
   <a href="https://github.com/cobusgreyling/loop-engineering/actions/workflows/audit.yml"><img src="https://img.shields.io/github/actions/workflow/status/cobusgreyling/loop-engineering/audit.yml?label=loop-audit%20dogfood" alt="loop-audit dogfood"></a>
+  <a href="https://www.npmjs.com/package/@cobusgreyling/loop"><img src="https://img.shields.io/npm/v/@cobusgreyling/loop?label=loop" alt="loop npm"></a>
   <a href="https://www.npmjs.com/package/@cobusgreyling/loop-audit"><img src="https://img.shields.io/npm/v/@cobusgreyling/loop-audit?label=loop-audit" alt="loop-audit npm"></a>
   <a href="https://www.npmjs.com/package/@cobusgreyling/loop-init"><img src="https://img.shields.io/npm/v/@cobusgreyling/loop-init?label=loop-init" alt="loop-init npm"></a>
   <a href="https://www.npmjs.com/package/@cobusgreyling/loop-cost"><img src="https://img.shields.io/npm/v/@cobusgreyling/loop-cost?label=loop-cost" alt="loop-cost npm"></a>
@@ -35,12 +36,17 @@
 </p>
 
 ```bash
+# Front door (recommended) — one binary for init + doctor + status
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
+npx @cobusgreyling/loop doctor .
+
+# Same as before (still fully supported — forks need not change)
 npx @cobusgreyling/loop-init .
 # Optional: also scaffold a versioned harness (harness-foundry)
-npx @cobusgreyling/loop-init . --with-foundry
+npx @cobusgreyling/loop init . --with-foundry
 ```
 
-`loop-init` scaffolds skills, state, and budget files, then prints your **Loop Ready** score and first loop command. Swap `--tool` for `claude`, `codex`, or `opencode`. Use `--with-foundry` when you want the loop as a composable runtime stack.
+`loop init` (or `loop-init`) scaffolds skills, state, and budget files, then prints your **Loop Ready** score and first loop command. `loop doctor` combines audit + sync + file checks into top-3 next actions. Swap `--tool` for `claude`, `codex`, or `opencode`. Use `--with-foundry` when you want the loop as a composable runtime stack. See [docs/cli-front-door.md](docs/cli-front-door.md).
 
 <p align="center">
   <a href="docs/QUICKSTART.md">
@@ -81,7 +87,8 @@ For developers using Grok, Claude Code, Codex, Cursor, and other AI coding agent
 
 | Start here | Description |
 |------------|-------------|
-| [Quickstart (5 min)](docs/QUICKSTART.md) | Scaffold → cost check → audit → first loop — **start here if you just landed** |
+| [Quickstart (5 min)](docs/QUICKSTART.md) | `loop init` → `loop doctor` → first loop — **start here if you just landed** |
+| [CLI front door](docs/cli-front-door.md) | Unified `@cobusgreyling/loop` — old packages stay open |
 | [Loop Engineering essay](https://cobusgreyling.substack.com/p/loop-engineering) | The concept, primitives, and Grok mapping — read for the why |
 | [Pattern Picker](docs/pattern-picker.md) | Which loop to run first — **start here if unsure** |
 | [Primitives Matrix](docs/primitives-matrix.md) | Cross-tool loop primitive mapping — bookmark this |
@@ -89,8 +96,9 @@ For developers using Grok, Claude Code, Codex, Cursor, and other AI coding agent
 | [Patterns](patterns/README.md) | 7 production patterns + [interactive picker](https://cobusgreyling.github.io/loop-engineering/#interactive) |
 | [Starters](starters/) | Clone-and-run kits (Grok, Claude Code, Codex, Opencode) |
 | [Opencode examples](examples/opencode/) | CLI-first loops: cron/systemd + `opencode run`, skills, worktrees |
-| [loop-audit](tools/loop-audit/) | Loop Readiness Score CLI (v1.7 — constraints + governance + **Harness Runtime**) — `npx @cobusgreyling/loop-audit . --suggest` · `--badge` for README |
-| [loop-init](tools/loop-init/) | Scaffold starters + budget/run-log + constraints (v1.5) — `npx @cobusgreyling/loop-init . --pattern daily-triage --tool grok` · **`--with-foundry`** for harness stack |
+| [**loop** (front door)](tools/loop/) | **Unified CLI** — `npx @cobusgreyling/loop init \| doctor \| status \| audit \| cost` · [cli-front-door](docs/cli-front-door.md) |
+| [loop-audit](tools/loop-audit/) | Loop Readiness Score CLI (v1.7 — constraints + governance + **Harness Runtime**) — `npx @cobusgreyling/loop audit . --suggest` · also `loop-audit` |
+| [loop-init](tools/loop-init/) | Scaffold starters + budget/run-log + constraints (v1.5) — `npx @cobusgreyling/loop init . --pattern daily-triage --tool grok` · also `loop-init` |
 | [harness-foundry](https://github.com/cobusgreyling/harness-foundry) | **Companion runtime:** versioned stacks, sessions, traces — `npx @cobusgreyling/harness-foundry init --from loop-engineering:daily-triage` |
 | [outerloop](https://github.com/cobusgreyling/outerloop) | **Companion governance:** evidence → verdict → answerability |
 | [loop-cost](tools/loop-cost/) | Token spend estimator — `npx @cobusgreyling/loop-cost` |
@@ -114,8 +122,8 @@ memory-engineering → loop-engineering → harness-foundry → outerloop → fl
 | Layer | You get | Start |
 |-------|---------|--------|
 | **Memory** | Tiers, recall budget, Memory Ready score | [memory-engineering](https://github.com/cobusgreyling/memory-engineering) |
-| **Design** (this repo) | Patterns, starters, Loop Ready score | `npx @cobusgreyling/loop-init .` |
-| **Runtime** | Versioned harness, traces, evolve | `npx @cobusgreyling/loop-init . --with-foundry` or [Foundry showcase](https://github.com/cobusgreyling/harness-foundry/blob/main/docs/showcase.md) |
+| **Design** (this repo) | Patterns, starters, Loop Ready score | `npx @cobusgreyling/loop init .` then `loop doctor .` |
+| **Runtime** | Versioned harness, traces, evolve | `npx @cobusgreyling/loop init . --with-foundry` or [Foundry showcase](https://github.com/cobusgreyling/harness-foundry/blob/main/docs/showcase.md) |
 | **Govern** | Evidence, verdict, answerability | [outerloop](https://github.com/cobusgreyling/outerloop) |
 | **Fleet** | Registry, inbox, budgets, kill switch | `npx @cobusgreyling/fleet-init .` · [Fleet Ready](https://github.com/cobusgreyling/fleet-engineering/blob/main/docs/fleet-ready-score.md) |
 
@@ -216,17 +224,16 @@ Machine-readable index: [patterns/registry.yaml](patterns/registry.yaml) (7 patt
 ## Getting Started (5 minutes)
 
 ```bash
-# 1. Scaffold + get your Loop Ready score (printed automatically)
-npx @cobusgreyling/loop-init . --pattern daily-triage --tool grok
+# 1. Scaffold + Loop Ready score (printed automatically)
+npx @cobusgreyling/loop init . --pattern daily-triage --tool grok
 
-# 2. Estimate token spend for your cadence
-npx @cobusgreyling/loop-cost --pattern daily-triage --level L1
+# 2. One health check (audit + sync + files → top 3 actions)
+npx @cobusgreyling/loop doctor .
 
-# 3. Re-audit after improvements
-npx @cobusgreyling/loop-audit . --suggest
-
-# Optional: paste Loop Ready badge into your README
-npx @cobusgreyling/loop-audit . --badge
+# 3. Optional: cost estimate / badge / day-2 dashboard
+npx @cobusgreyling/loop cost --pattern daily-triage --level L1
+npx @cobusgreyling/loop badge .
+npx @cobusgreyling/loop status .
 
 # 4. See scores climb: empty → L1 → L2
 bash scripts/before-after-demo.sh
@@ -235,11 +242,14 @@ bash scripts/before-after-demo.sh
 /loop 1d Run loop-triage. Update STATE.md. No auto-fix in week one.
 ```
 
+**Same as before:** `npx @cobusgreyling/loop-init` and `loop-audit` still work — [CLI front door](docs/cli-front-door.md).
+
 All npm CLIs publish from tagged releases — see [docs/RELEASE.md](docs/RELEASE.md). No clone required.
 
 **Develop from source** (monorepo contributors):
 
 ```bash
+cd tools/loop && npm ci && npm test && node dist/cli.js doctor ../..
 cd tools/loop-init && npm ci && npm test && node dist/cli.js /path/to/project --pattern daily-triage --tool grok
 cd tools/loop-audit && npm ci && npm test && node dist/cli.js /path/to/project --suggest
 cd tools/loop-cost && npm ci && npm test && node dist/cli.js --pattern ci-sweeper --cadence 15m

@@ -1,9 +1,10 @@
 # Release playbook — npm packages
 
-This repo ships eleven public npm packages from `tools/`:
+This repo ships public npm packages from `tools/`. **Front door for users:** `@cobusgreyling/loop` ([cli-front-door.md](./cli-front-door.md)). Sibling packages stay published and supported.
 
 | Package | Directory | Release tag |
 |---------|-----------|-------------|
+| `@cobusgreyling/loop` | `tools/loop` | `loop-v*` |
 | `@cobusgreyling/readiness-core` | `tools/readiness-core` | `readiness-core-v*` |
 | `@cobusgreyling/loop-audit` | `tools/loop-audit` | `loop-audit-v*` |
 | `@cobusgreyling/loop-init` | `tools/loop-init` | `loop-init-v*` |
@@ -22,6 +23,7 @@ Link npm to GitHub, then for **each package** on [npmjs.com](https://www.npmjs.c
 
 | Package | Repository | Workflow filename |
 |---------|--------------|-------------------|
+| `@cobusgreyling/loop` | `cobusgreyling/loop-engineering` | `release-loop.yml` |
 | `@cobusgreyling/readiness-core` | `cobusgreyling/loop-engineering` | `release-readiness-core.yml` |
 | `@cobusgreyling/loop-audit` | `cobusgreyling/loop-engineering` | `release-loop-audit.yml` |
 | `@cobusgreyling/loop-init` | `cobusgreyling/loop-engineering` | `release-loop-init.yml` |
@@ -54,6 +56,10 @@ Tag pushes trigger the release workflows:
 # readiness-core (MUST be published before loop-audit and goal-audit)
 git tag readiness-core-v1.0.0
 git push origin readiness-core-v1.0.0
+
+# loop (unified front door — pass-through + doctor/status)
+git tag loop-v0.1.0
+git push origin loop-v0.1.0
 
 # loop-audit (runs tests before publish)
 git tag loop-audit-v1.6.0
@@ -96,7 +102,7 @@ git tag goal-init-v1.0.0
 git push origin goal-init-v1.0.0
 ```
 
-Workflows: `.github/workflows/release-readiness-core.yml`, `.github/workflows/release-loop-audit.yml`, `.github/workflows/release-loop-init.yml`, `.github/workflows/release-loop-cost.yml`, `.github/workflows/release-loop-sync.yml`, `.github/workflows/release-loop-context.yml`, `.github/workflows/release-loop-mcp-server.yml`, `.github/workflows/release-loop-worktree.yml`, `.github/workflows/release-loop-gate.yml`, `.github/workflows/release-goal-audit.yml`, `.github/workflows/release-goal-init.yml`.
+Workflows: `.github/workflows/release-loop.yml`, `.github/workflows/release-readiness-core.yml`, `.github/workflows/release-loop-audit.yml`, `.github/workflows/release-loop-init.yml`, `.github/workflows/release-loop-cost.yml`, `.github/workflows/release-loop-sync.yml`, `.github/workflows/release-loop-context.yml`, `.github/workflows/release-loop-mcp-server.yml`, `.github/workflows/release-loop-worktree.yml`, `.github/workflows/release-loop-gate.yml`, `.github/workflows/release-goal-audit.yml`, `.github/workflows/release-goal-init.yml`.
 
 ## Verify after publish
 
